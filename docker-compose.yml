@@ -1,0 +1,36 @@
+# docker-compose.yml
+
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    container_name: spl_tracker_db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: spl_tracker_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      # Pass environment variables for your NestJS config
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      HELIUS_API_KEY: ${HELIUS_API_KEY}
+volumes:
+  db_data:

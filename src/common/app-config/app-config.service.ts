@@ -12,6 +12,9 @@ export interface SplAppConfig {
     // ... any other logger options you want
   };
   // ... add more sections as needed
+  service: {
+    port: number;
+  };
 }
 
 @Injectable()
@@ -25,12 +28,16 @@ export class SplAppConfigService {
         type: this.configService.get<string>("DB_TYPE", "postgres"), // Ensure this is 'postgres'
         host: this.configService.get<string>("DB_HOST", "localhost"),
         port: parseInt(this.configService.get<string>("DB_PORT") || "5432", 10),
-        username: this.configService.get<string>("DB_USER", "spl_user"),
-        password: this.configService.get<string>("DB_PASS", "spl_pass"),
-        database: this.configService.get<string>("DB_NAME", "spl_tracker"),
+        username: this.configService.get<string>("DB_USER"),
+        password: this.configService.get<string>("DB_PASS"),
+        database: this.configService.get<string>("DB_NAME"),
         synchronize: this.configService.get<string>("DB_SYNC") === "true",
         autoLoadEntities: true,
         logging: this.configService.get<string>("DB_LOGGING") === "true",
+        migrations: ["dist/migrations/*.js"],
+        cli: {
+          migrationsDir: "src/migrations",
+        },
       },
       helio: {
         apiKey: this.configService.get<string>("HELIUS_API_KEY", ""),
@@ -39,6 +46,9 @@ export class SplAppConfigService {
         level: this.configService.get<string>("LOGGER_LEVEL", "debug"),
         // add more logger fields if needed
       },
+      service: {
+        port: parseInt(this.configService.get<string>("PORT") || "3775", 10),
+      }
     };
   }
 }

@@ -7,6 +7,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 // or whichever DB approach you're using
 import { HeliusClient } from "./clients/helius.client";
 import { SplAppConfigService } from "./app-config/app-config.service";
+import { DataSource, DataSourceOptions } from "typeorm";
+import { HttpModule } from "@nestjs/axios";
 
 // Example "in-memory" DB config, if you need it for tests/dev
 // (You might not need this if you’re using a real Postgres or MySQL)
@@ -35,6 +37,7 @@ export const inMemoryDBConfig = {
         return process.env.CLIENT_SPEC_PATH ? inMemoryDBConfig : appConfigService.config.database;
       },
     }),
+    HttpModule, // Make the HTTP module available everywhere
   ],
   providers: [
     SplAppConfigService,
@@ -44,6 +47,7 @@ export const inMemoryDBConfig = {
   exports: [
     SplAppConfigService,
     HeliusClient,
+    HttpModule, // make the HTTP module available everywhere
     // ... export other services so they're available everywhere
   ],
 })

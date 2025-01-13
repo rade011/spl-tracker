@@ -14,7 +14,7 @@ export class ScheduledTasksService {
    * Cron Job: Runs every 4 hours.
    * Fetches and updates wallet balances from Helius API.
    */
-  @Cron("*/1 * * * *")
+  @Cron("0 0-23/4 * * *")
   async handleDailyWalletUpdate() {
     this.logger.log('Starting daily wallet balance update.');
 

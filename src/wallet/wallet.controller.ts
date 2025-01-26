@@ -1,18 +1,20 @@
-import { Controller, Get, Logger } from "@nestjs/common";
+import { Controller, Get, Logger, Param, Query } from "@nestjs/common";
 import { WalletService } from "./wallet.service";
 
-@Controller("wallets")
+@Controller()
 export class WalletController {
   private readonly logger = new Logger(WalletService.name);
   constructor(private readonly walletService: WalletService) {}
 
-  @Get()
+  @Get("/wallets")
   async getAllWallets() {
     return await this.walletService.getAllWallets();
   }
 
-  @Get(":owner")
-  async getWallet(owner: string) {
+  @Get("/balance/:owner")
+  async getWallet(
+    @Param("owner") owner: string,
+  ) {
     return await this.walletService.getWallet(owner);
   }
 

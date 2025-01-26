@@ -1,6 +1,7 @@
 // src/common/app-config.service.ts
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { CronExpression } from "@nestjs/schedule";
 
 export interface SplAppConfig {
   database: any; // or a typed DB config object
@@ -14,6 +15,12 @@ export interface SplAppConfig {
   // ... add more sections as needed
   service: {
     port: number;
+  };
+
+  cronExpression: {
+    fourHour: string;
+    hourly: string;
+    everyMinute: string;
   };
 }
 
@@ -48,6 +55,11 @@ export class SplAppConfigService {
       },
       service: {
         port: parseInt(this.configService.get<string>("PORT") || "3775", 10),
+      },
+      cronExpression: {
+        fourHour: this.configService.get<string>("CRON_FOUR_HOUR", CronExpression.EVERY_4_HOURS),
+        hourly: this.configService.get<string>("CRON_HOURLY", CronExpression.EVERY_HOUR),
+        everyMinute: this.configService.get<string>("CRON_EVERY_MINUTE", CronExpression.EVERY_MINUTE),
       }
     };
   }

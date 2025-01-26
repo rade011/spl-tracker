@@ -19,6 +19,8 @@ const TOKEN_DECIMALS = 5;
 @Injectable()
 export class WalletService {
   private readonly logger = new Logger(WalletService.name);
+  private readonly TOTAL_COIN_SUPPLY: number = 21000000; // 21,000,000,000
+  private readonly DYNAMIC_THRESHOLD: number = 231000;
 
   constructor(
     @InjectRepository(WalletState)
@@ -149,33 +151,50 @@ export class WalletService {
     }
   }
 
-  // src/wallet/wallet.service.ts
-
+  /**
+   * Calculates the eligibility percentage based on the amount of coins held.
+   *
+   * - For amounts <= 231,000, returns predefined percentages.
+   * - For amounts > 231,000, calculates the percentage based on total coin supply.
+   *
+   * @param amount - The amount of coins held by the user.
+   * @returns The eligibility percentage as a number on a 0 to 100 scale.
+   * @throws Will throw an error if the amount is not a valid number or is negative.
+   */
   private calculateEligibilityPercentage(amount: number): number {
-    if (amount < 20999) {
-      return 0;
-    } else if (amount >= 21000 && amount <= 41999) {
-      return 0.1;
-    } else if (amount >= 42000 && amount <= 62999) {
-      return 0.2;
-    } else if (amount >= 63000 && amount <= 83999) {
-      return 0.3;
-    } else if (amount >= 84000 && amount <= 104999) {
-      return 0.4;
-    } else if (amount >= 105000 && amount <= 125999) {
-      return 0.5;
-    } else if (amount >= 126000 && amount <= 146999) {
-      return 0.6;
-    } else if (amount >= 147000 && amount <= 167999) {
-      return 0.7;
-    } else if (amount >= 168000 && amount <= 188999) {
-      return 0.8;
-    } else if (amount >= 189000 && amount <= 209999) {
-      return 0.9;
-    } else if (amount >= 210000 && amount <= 230999) {
-      return 1.0;
-    } else {
-      return 1.0; // For amounts above 231,000
+    // Input Validation
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      throw new Error('Amount must be a valid number.');
     }
+
+    if (amount < 0) {
+      throw new Error('Amount cannot be negative.');
+    }
+
+    const tiers = [
+      { min: 210000, max: 230999, percentage: 1.0 },
+      { min: 189000, max: 209999, percentage: 0.9 },
+      { min: 168000, max: 188999, percentage: 0.8 },
+      { min: 147000, max: 167999, percentage: 0.7 },
+      { min: 126000, max: 146999, percentage: 0.6 },
+      { min: 105000, max: 125999, percentage: 0.5 },
+      { min: 84000, max: 104999, percentage: 0.4 },
+      { min: 63000, max: 83999, percentage: 0.3 },
+      { min: 42000, max: 62999, percentage: 0.2 },
+      { min: 21000, max: 41999, percentage: 0.1 },
+      { min: 0, max: 20999, percentage: 0 },
+    ];
+
+    if (amount > this.DYNAMIC_THRESHOLD) {
+      // Calculate percentage based on total coin supply
+      let percentage = (amount / this.TOTAL_COIN_SUPPLY) * 100; // Convert to percentage
+      // Cap the percentage at 100%
+      percentage = percentage > 100 ? 100 : parseFloat(percentage.toFixed(4)); // Rounded to 4 decimal places
+      return percentage;
+    }
+
+    const matchingTier = tiers.find(tier => amount >= tier.min && amount <= tier.max);
+    return matchingTier ? matchingTier.percentage : 0;
   }
+
 }

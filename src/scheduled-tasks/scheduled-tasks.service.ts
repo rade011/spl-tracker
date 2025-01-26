@@ -11,10 +11,10 @@ export class ScheduledTasksService {
   constructor(private readonly walletService: WalletService) {}
 
   /**
-   * Cron Job: Runs every 4 hours.
+   * Cron Job: Runs daily at midnight.
    * Fetches and updates wallet balances from Helius API.
    */
-  @Cron("0 0-23/4 * * *")
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleDailyWalletUpdate() {
     this.logger.log('Starting daily wallet balance update.');
 
@@ -32,7 +32,7 @@ export class ScheduledTasksService {
    * Cron Job: Runs daily at noon.
    * Additional scheduled tasks can be added here.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_NOON)
+  @Cron("*/30 * * * * *")
   async handleNoonTasks() {
     this.logger.log('Starting noon scheduled tasks.');
 
